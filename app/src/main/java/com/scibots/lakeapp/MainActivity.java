@@ -4,6 +4,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 
 import android.Manifest;
+import android.app.NotificationManager;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.content.pm.PackageManager;
@@ -11,6 +12,7 @@ import android.content.res.Resources;
 import android.location.Location;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.SystemClock;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -50,11 +52,12 @@ public class MainActivity extends AppCompatActivity  implements OnMapReadyCallba
 	private Button activate;
 	private FloatingActionButton zoomin;
 	private FloatingActionButton zoomout;
+	private Boolean isActivated = false;
 	private static final int CONTACT_PICKER_REQUEST = 991;
 	public static final int PERMISSIONS_MULTIPLE_REQUEST = 123;
 
 	private GoogleMap mMap;
-//	private HotWordTriggeringService myServiceBinder = null;
+	private HotWordTriggeringService myServiceBinder = null;
 	public ServiceConnection myConnection;
 
 	@Override
@@ -72,6 +75,33 @@ public class MainActivity extends AppCompatActivity  implements OnMapReadyCallba
 		mapFragment.getMapAsync(this);
 		activate = findViewById(R.id.activate);
 		activate.setBackgroundResource(R.drawable.roundbutton);
+
+		if (ServiceTools.isServiceRunning("com.scibots.lakeapp.HotWordTriggeringService",getApplicationContext())) {
+			isActivated = true;
+		}
+		activate.setOnClickListener(new View.OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				isActivated = !isActivated;
+				Intent intent = new Intent(MainActivity.this, HotWordTriggeringService.class);
+				if (isActivated) {
+					startService(intent);
+				}
+				else {
+					stopService(intent);
+					final NotificationManager mNotificationManager = (NotificationManager) getSystemService(getApplicationContext().NOTIFICATION_SERVICE);
+
+					new Thread(new Runnable() {
+						@Override
+						public void run() {
+							SystemClock.sleep(1000);
+							mNotificationManager.cancel(1);
+						}
+					});
+
+				};
+			}
+		});
 		if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
 			requestMicrophonePermission();
 			return;
@@ -109,8 +139,8 @@ public class MainActivity extends AppCompatActivity  implements OnMapReadyCallba
 	}
 
 	public void doBindService() {
-//		Intent intent = new Intent(MainActivity.this,HotWordTriggeringService.class);
-//		bindService(intent,myConnection, 0);
+		Intent intent = new Intent(MainActivity.this,HotWordTriggeringService.class);
+		bindService(intent,myConnection, 0);
 	}
 
 	@Override
