@@ -44,6 +44,7 @@ import org.tensorflow.contrib.android.TensorFlowInferenceInterface;
 
 import java.io.IOException;
 import java.text.SimpleDateFormat;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.concurrent.locks.ReentrantLock;
@@ -63,12 +64,12 @@ public class HotWordTriggeringService extends Service implements GoogleApiClient
     private static final long MINIMUM_TIME_BETWEEN_SAMPLES_MS = 500;
     private static final int RECORDING_LENGTH = (int) (SAMPLE_RATE * SAMPLE_DURATION_MS / 1000);
     private static final String MODEL_FILENAME = "file:///android_asset/edgespeechneta.pb";
-    private static final String  NEW_MODEL_FILENAME = "file:///android_asset/augkeyword1.pb";
+    private static final String  NEW_MODEL_FILENAME = "file:///android_asset/rm1.pb";
     private static final String ENV_MODEL_FILENAME = "file:///android_asset/stressnew.pb";
     private static final String INPUT_DATA_NAME = "trainable_stft_input";
     private static final String INPUT_DATA_NAME_KEYWORD = "trainable_stft_input";
     private static final String OUTPUT_SCORES_NAME = "dense_2/Softmax";
-    private static final String OUTPUT_SCORES_NAME_NEWMODEL = "dense_3/Softmax";
+    private static final String OUTPUT_SCORES_NAME_NEWMODEL = "dense_1/Softmax";
 
     private static final String ENV_INPUT_DATA_NAME = "trainable_stft_input";
     private static final String ENV_OUTPUT_SCORES_NAME = "dense_1/Softmax";
@@ -409,7 +410,7 @@ public class HotWordTriggeringService extends Service implements GoogleApiClient
             env_inferenceInterface.fetch(ENV_OUTPUT_SCORES_NAME, env_outputScores);
 
             // run new model
-            float[] outputScores_newmodel = new float[8];
+            float[] outputScores_newmodel = new float[5];
             newmodel_inferenceInterface.feed(INPUT_DATA_NAME_KEYWORD, floatInputBuffer_newmodel, 1,1,16000 * 3);
             String[] outputScoresNames_newmodel = new String[]{OUTPUT_SCORES_NAME_NEWMODEL};
             newmodel_inferenceInterface.run(outputScoresNames_newmodel);
@@ -443,40 +444,37 @@ public class HotWordTriggeringService extends Service implements GoogleApiClient
             env_map.put(3,"happy");
 
             final  HashMap<Integer,String> newmodel_map  = new HashMap<>();
-            newmodel_map.put(0,"bacho");
-            newmodel_map.put(1,"background");
-            newmodel_map.put(2,"go");
+            newmodel_map.put(0,"Utavi");
+            newmodel_map.put(1,"bachao");
+            newmodel_map.put(2,"danger");
             newmodel_map.put(3,"help");
-            newmodel_map.put(4,"no");
-            newmodel_map.put(5,"stop");
-            newmodel_map.put(6,"unknown");
-            newmodel_map.put(7,"yes");
+            newmodel_map.put(4,"musyibat");
+            Log.d(TAG,  Arrays.toString(outputScores_newmodel));
+            if(outputScores_newmodel[r_newmodel] > 0.1) {
+                notification = new NotificationCompat.Builder(this,CHANNEL_ID)
+                        .setContentTitle("Automatic Protection On")
+                        .setContentText("You just said," +  newmodel_map.get(r_newmodel)+ " new: " + env_map.get(r_env) +" with probabilty " + outputScores_newmodel[r_newmodel] )
+                        .setOnlyAlertOnce(true)
+                        .setOngoing(false)
+                        .setTimeoutAfter(0)
+                        .setSmallIcon(R.drawable.ic_add)
+                        .build();
+                NotificationManager mNotificationManager = (NotificationManager) getSystemService(getApplicationContext().NOTIFICATION_SERVICE);
 
-//            if(outputScores_newmodel[r_newmodel] > 0.96) {
-//                notification = new NotificationCompat.Builder(this,CHANNEL_ID)
-//                        .setContentTitle("Automatic Protection On")
-//                        .setContentText("You just said," +  newmodel_map.get(r_newmodel)+ " new: " + env_map.get(r_env) +" with probabilty " + outputScores_newmodel[r_newmodel] )
-//                        .setOnlyAlertOnce(true)
-//                        .setOngoing(false)
-//                        .setTimeoutAfter(0)
-//                        .setSmallIcon(R.drawable.ic_add)
-//                        .build();
-//                NotificationManager mNotificationManager = (NotificationManager) getSystemService(getApplicationContext().NOTIFICATION_SERVICE);
-//
-//                mNotificationManager.notify(1, notification);
-//            } else {
-//                notification = new NotificationCompat.Builder(this,CHANNEL_ID)
-//                        .setContentTitle("Automatic Protection On")
-//                        .setContentText("You just said," + "unknown"+ " new: " + env_map.get(r_env) +" with probabilty " + outputScores_newmodel[r_newmodel] )
-//                        .setOnlyAlertOnce(true)
-//                        .setOngoing(false)
-//                        .setTimeoutAfter(0)
-//                        .setSmallIcon(R.drawable.ic_add)
-//                        .build();
-//                NotificationManager mNotificationManager = (NotificationManager) getSystemService(getApplicationContext().NOTIFICATION_SERVICE);
-//                mNotificationManager.notify(1, notification);
-//            }
-//
+                mNotificationManager.notify(1, notification);
+            } else {
+                notification = new NotificationCompat.Builder(this,CHANNEL_ID)
+                        .setContentTitle("Automatic Protection On")
+                        .setContentText("You just said," + "unknown"+ " new: " + env_map.get(r_env) +" with probabilty " + outputScores_newmodel[r_newmodel] )
+                        .setOnlyAlertOnce(true)
+                        .setOngoing(false)
+                        .setTimeoutAfter(0)
+                        .setSmallIcon(R.drawable.ic_add)
+                        .build();
+                NotificationManager mNotificationManager = (NotificationManager) getSystemService(getApplicationContext().NOTIFICATION_SERVICE);
+                mNotificationManager.notify(1, notification);
+            }
+
 
             // send alert on saying stop
             float score = 0.0f;
