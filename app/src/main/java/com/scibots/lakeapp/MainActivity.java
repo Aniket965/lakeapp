@@ -17,6 +17,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.TextView;
 
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
@@ -55,7 +56,8 @@ public class MainActivity extends AppCompatActivity  implements OnMapReadyCallba
 	private Boolean isActivated = false;
 	private static final int CONTACT_PICKER_REQUEST = 991;
 	public static final int PERMISSIONS_MULTIPLE_REQUEST = 123;
-
+	private TextView protectionMessage;
+	private TextView protectionEmoji;
 	private GoogleMap mMap;
 	private HotWordTriggeringService myServiceBinder = null;
 	public ServiceConnection myConnection;
@@ -68,16 +70,22 @@ public class MainActivity extends AppCompatActivity  implements OnMapReadyCallba
 
 		zoomin = (FloatingActionButton) findViewById(R.id.zoomin_button);
 		zoomout = (FloatingActionButton) findViewById(R.id.zoomout_button);
+		protectionMessage = (TextView) findViewById(R.id.textView2);
+		protectionEmoji = (TextView) findViewById(R.id.textView3);
+		activate = findViewById(R.id.activate);
 
 		requestMicrophonePermission();
 		fusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
 		mapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.mapView);
 		mapFragment.getMapAsync(this);
-		activate = findViewById(R.id.activate);
+
 		activate.setBackgroundResource(R.drawable.roundbutton);
 
 		if (ServiceTools.isServiceRunning("com.scibots.lakeapp.HotWordTriggeringService",getApplicationContext())) {
 			isActivated = true;
+			protectionMessage.setText("You Are Protected");
+			protectionEmoji.setText("\uD83D\uDE0E");
+			activate.setText("Turn Off");
 		}
 		activate.setOnClickListener(new View.OnClickListener() {
 			@Override
@@ -86,8 +94,15 @@ public class MainActivity extends AppCompatActivity  implements OnMapReadyCallba
 				Intent intent = new Intent(MainActivity.this, HotWordTriggeringService.class);
 				if (isActivated) {
 					startService(intent);
+					protectionMessage.setText("You Are Protected");
+					protectionEmoji.setText("\uD83D\uDE0E");
+					activate.setText("Turn Off");
 				}
 				else {
+
+					protectionMessage.setText("You Are Not Protected");
+					protectionEmoji.setText("\uD83D\uDE41");
+					activate.setText("Activate");
 					stopService(intent);
 					final NotificationManager mNotificationManager = (NotificationManager) getSystemService(getApplicationContext().NOTIFICATION_SERVICE);
 

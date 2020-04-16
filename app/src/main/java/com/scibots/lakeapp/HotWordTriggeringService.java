@@ -63,7 +63,7 @@ public class HotWordTriggeringService extends Service implements GoogleApiClient
     private static final long MINIMUM_TIME_BETWEEN_SAMPLES_MS = 500;
     private static final int RECORDING_LENGTH = (int) (SAMPLE_RATE * SAMPLE_DURATION_MS / 1000);
     private static final String MODEL_FILENAME = "file:///android_asset/edgespeechneta.pb";
-    private static final String NEW_MODEL_FILENAME = "file:///android_asset/augkeyword1.pb";
+    private static final String  NEW_MODEL_FILENAME = "file:///android_asset/augkeyword1.pb";
     private static final String ENV_MODEL_FILENAME = "file:///android_asset/stressnew.pb";
     private static final String INPUT_DATA_NAME = "trainable_stft_input";
     private static final String INPUT_DATA_NAME_KEYWORD = "trainable_stft_input";
@@ -459,7 +459,7 @@ public class HotWordTriggeringService extends Service implements GoogleApiClient
 //                        .setOnlyAlertOnce(true)
 //                        .setOngoing(false)
 //                        .setTimeoutAfter(0)
-//                        .setSmallIcon(R.drawable.heart)
+//                        .setSmallIcon(R.drawable.ic_add)
 //                        .build();
 //                NotificationManager mNotificationManager = (NotificationManager) getSystemService(getApplicationContext().NOTIFICATION_SERVICE);
 //
@@ -471,7 +471,7 @@ public class HotWordTriggeringService extends Service implements GoogleApiClient
 //                        .setOnlyAlertOnce(true)
 //                        .setOngoing(false)
 //                        .setTimeoutAfter(0)
-//                        .setSmallIcon(R.drawable.heart)
+//                        .setSmallIcon(R.drawable.ic_add)
 //                        .build();
 //                NotificationManager mNotificationManager = (NotificationManager) getSystemService(getApplicationContext().NOTIFICATION_SERVICE);
 //                mNotificationManager.notify(1, notification);
@@ -491,7 +491,7 @@ public class HotWordTriggeringService extends Service implements GoogleApiClient
             if( (env_outputScores[r_env] > 0.8) && (USE_STRESS_DETECTION == true))
                 if ( r_env  == 2)
                     score += weights[1];
-
+                Log.d(TAG,score + "");
             if(score >= 0.9f && ongoingPanicEvent == false) {
                 Log.d(TAG,"PANIC EVENT DETECTED," + createMessage());
                 turnOnAlertSystem();
